@@ -5,7 +5,7 @@
 Install the library using `pip`:
 
 ```bash
-pip install https://github.com/sioxty/aiosoundcloud
+pip install git+https://github.com/sioxty/aiosoundcloud.git
 ```
 
 ## Usage Example
