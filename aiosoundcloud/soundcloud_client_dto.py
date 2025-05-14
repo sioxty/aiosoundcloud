@@ -1,23 +1,32 @@
 import re
 import aiohttp
 from .soundcloud_client import SoundCloudClient
-from .schemas import Track,User
+from .schemas import Track, User
+from cachetools import cached, TTLCache
 import logging
 
 log = logging.getLogger(__name__)
 
+# Create a cache with a time-to-live (TTL) of 300 seconds and a max size of 100 items
+cache = TTLCache(maxsize=100, ttl=60*60)
+cache_url = TTLCache(maxsize=100, ttl=60*4)
+
 class SoundCloud(SoundCloudClient):
-    async def search(self,query:str,limit:int=10)->list[Track]:
-        response = await super().search(query,limit)
+    @cached(cache)
+    async def search(self, query: str, limit: int = 10) -> list[Track]:
+        response = await super().search(query, limit)
         return [Track.from_dict(item) for item in response.get("collection", [])]
     
+    @cached(cache)
     async def get_track(self, _id):
         return Track.from_dict(await super().get_track(_id))
 
+    @cached(cache)
     async def get_user(self, _id):
         return User.from_dict(await super().get_user(_id))
     
-    async def get_stream_url(self, track:Track) -> str:
+    @cached(cache_url)
+    async def get_stream_url(self, track: Track) -> str:
         """
         Fetches the stream URL for a given track.
         This method retrieves the streaming URL for a track by iterating through
@@ -40,6 +49,6 @@ class SoundCloud(SoundCloudClient):
                     trans_url = transcoding.url
                     async with session.get(f"{trans_url}?client_id={self.client_id}") as resp:
                         stream_info = await resp.json()
-                        stream_url:str = stream_info["url"]
+                        stream_url: str = stream_info["url"]
                         break
-            return stream_url        
+            return stream_url

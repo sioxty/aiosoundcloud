@@ -10,7 +10,7 @@ Modules:
     utils (module): Provides utility functions, such as `get_client_id`.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __author__ = "Sioxty"
 __license__ = "MIT"
 
